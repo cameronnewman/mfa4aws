@@ -18,6 +18,7 @@ script: make && make release
 
 after_success:
   - ./scripts/ci/tag.sh
+  - ./scripts/ci/coverage.sh
 
 deploy:
   provider: releases
