@@ -33,6 +33,13 @@ type AWSCredentials struct {
 	Expires            time.Duration `ini:"x_security_token_expires"`
 }
 
+//STSIdentity represents the STS Identity
+type STSIdentity struct {
+	Account string
+	ARN     string
+	UserID  string
+}
+
 //GenerateSTSCredentials created STS Credentials
 func GenerateSTSCredentials(profile string, tokenCode string) (*AWSCredentials, error) {
 
@@ -48,11 +55,11 @@ func GenerateSTSCredentials(profile string, tokenCode string) (*AWSCredentials, 
 		return nil, ErrAWSCredentialsFileNotFound
 	}
 
-	if err := checkProfile(f, profile); err != nil {
+	if err := validateProfile(f, profile); err != nil {
 		return nil, err
 	}
 
-	if err := checkToken(tokenCode); err != nil {
+	if err := validateToken(tokenCode); err != nil {
 		return nil, err
 	}
 
@@ -62,11 +69,6 @@ func GenerateSTSCredentials(profile string, tokenCode string) (*AWSCredentials, 
 
 	iamInstance := iam.New(awsSession)
 
-	iamUser, err := getIAMUserDetails(iamInstance)
-	if err != nil {
-		return nil, err
-	}
-
 	mfaSerialNumber, err := getIAMUserMFADevice(iamInstance)
 	if err != nil {
 		return nil, err
@@ -74,22 +76,27 @@ func GenerateSTSCredentials(profile string, tokenCode string) (*AWSCredentials, 
 
 	stsInstance := sts.New(awsSession)
 
-	stsSessionCredentials, err := generateSTSSessionCredentials(stsInstance, tokenCode, mfaSerialNumber)
+	stsSessionCredentials, err := getSTSSessionToken(stsInstance, tokenCode, mfaSerialNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	identity, err := getSTSIdentity(stsInstance)
 	if err != nil {
 		return nil, err
 	}
 
 	return &AWSCredentials{
-		AWSAccessKeyID: *stsSessionCredentials.AccessKeyId,
+		AWSAccessKeyID:     *stsSessionCredentials.AccessKeyId,
 		AWSSecretAccessKey: *stsSessionCredentials.SecretAccessKey,
-		AWSSessionToken: *stsSessionCredentials.SecretAccessKey,
-		AWSSecurityToken: *stsSessionCredentials.SecretAccessKey,
-		PrincipalARN: *iamUser.Arn,
-		Expires: time.Until(*stsSessionCredentials.Expiration),
+		AWSSessionToken:    *stsSessionCredentials.SecretAccessKey,
+		AWSSecurityToken:   *stsSessionCredentials.SecretAccessKey,
+		PrincipalARN:       identity.ARN,
+		Expires:            time.Until(*stsSessionCredentials.Expiration),
 	}, nil
 }
 
-func checkProfile(file []byte, profile string) error {
+func validateProfile(file []byte, profile string) error {
 	const (
 		profileDefault string = "default"
 
@@ -129,26 +136,12 @@ func openFile(path string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func checkToken(token string) error {
-
+func validateToken(token string) error {
 	if len(token) <= 5 {
 		return ErrInvalidToken
 	}
 
 	return nil
-}
-
-func getIAMUserDetails(iamInstance iamiface.IAMAPI) (*iam.User, error) {
-
-	identity, err := iamInstance.GetUser(&iam.GetUserInput{})
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			return nil, fmt.Errorf("Unable to retrive user - %v", aerr.Message())
-		}
-		return nil, fmt.Errorf("unknown error occurred, %v", err)
-	}
-
-	return identity.User, nil
 }
 
 func getIAMUserMFADevice(iamInstance iamiface.IAMAPI) (string, error) {
@@ -167,7 +160,7 @@ func getIAMUserMFADevice(iamInstance iamiface.IAMAPI) (string, error) {
 	return *devices.MFADevices[0].SerialNumber, nil
 }
 
-func generateSTSSessionCredentials(stsInstance stsiface.STSAPI, tokenCode string, mfaDeviceSerialNumber string) (*sts.Credentials, error) {
+func getSTSSessionToken(stsInstance stsiface.STSAPI, tokenCode string, mfaDeviceSerialNumber string) (*sts.Credentials, error) {
 	stsSession, err := stsInstance.GetSessionToken(&sts.GetSessionTokenInput{
 		TokenCode:    &tokenCode,
 		SerialNumber: &mfaDeviceSerialNumber,
@@ -187,4 +180,20 @@ func generateSTSSessionCredentials(stsInstance stsiface.STSAPI, tokenCode string
 	}
 
 	return stsSession.Credentials, nil
+}
+
+func getSTSIdentity(stsInstance stsiface.STSAPI) (*STSIdentity, error) {
+	identity, err := stsInstance.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			return nil, fmt.Errorf("Unable to retrive user - %v", aerr.Message())
+		}
+		return nil, fmt.Errorf("unknown error occurred, %v", err)
+	}
+
+	return &STSIdentity{
+		Account: *identity.Account,
+		ARN:     *identity.Arn,
+		UserID:  *identity.UserId,
+	}, nil
 }

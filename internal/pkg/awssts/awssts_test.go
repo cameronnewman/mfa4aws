@@ -6,11 +6,11 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/aws/aws-sdk-go/service/sts/stsiface"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/spf13/afero"
 
 	"mfa4aws/internal/pkg/awssts/mock/iammock"
@@ -65,7 +65,7 @@ func TestGenerateSTSCredentials(t *testing.T) {
 	}
 }
 
-func Test_checkProfile(t *testing.T) {
+func Test_validateProfile(t *testing.T) {
 	type args struct {
 		file    []byte
 		profile string
@@ -119,8 +119,8 @@ func Test_checkProfile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := checkProfile(tt.args.file, tt.args.profile); (err != nil) != tt.wantErr {
-				t.Errorf("checkProfile() error = %v, wantErr %v", err, tt.wantErr)
+			if err := validateProfile(tt.args.file, tt.args.profile); (err != nil) != tt.wantErr {
+				t.Errorf("validateProfile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -177,7 +177,7 @@ func Test_openFile(t *testing.T) {
 	}
 }
 
-func Test_checkToken(t *testing.T) {
+func Test_validateToken(t *testing.T) {
 	type args struct {
 		token string
 	}
@@ -210,73 +210,8 @@ func Test_checkToken(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := checkToken(tt.args.token); (err != nil) != tt.wantErr {
-				t.Errorf("checkToken() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func Test_getIAMUserDetails(t *testing.T) {	
-	type args struct {
-		iamInstance  iamiface.IAMAPI
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    *iam.User
-		wantErr bool
-	}{
-		{
-			"Vaild/EmptyUser",
-			args{
-				iamInstance: &iammock.IAMAPIMock{
-					GetUserFunc: func(in1 *iam.GetUserInput) (*iam.GetUserOutput, error) {
-						
-						output := &iam.GetUserOutput{
-							User: &iam.User{},
-						}
-						return output, nil
-					},
-				},
-			},
-			&iam.User{},
-			false,
-		},
-		{
-			"Invaild/EmptyUser/Error",
-			args{
-				iamInstance: &iammock.IAMAPIMock{
-					GetUserFunc: func(in1 *iam.GetUserInput) (*iam.GetUserOutput, error) {
-						return nil, xerrors.New("blah")
-					},
-				},
-			},
-			nil,
-			true,
-		},
-		{
-			"Invaild/EmptyUser/awserrError",
-			args{
-				iamInstance: &iammock.IAMAPIMock{
-					GetUserFunc: func(in1 *iam.GetUserInput) (*iam.GetUserOutput, error) {
-						return nil, awserr.New("5000", "blah", xerrors.New("blah"))
-					},
-				},
-			},
-			nil,
-			true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := getIAMUserDetails(tt.args.iamInstance)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("getIAMUserDetails() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("getIAMUserDetails() = %v, want %v", got, tt.want)
+			if err := validateToken(tt.args.token); (err != nil) != tt.wantErr {
+				t.Errorf("validateToken() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -340,7 +275,7 @@ func Test_getIAMUserMFADevice(t *testing.T) {
 			args{
 				iamInstance: &iammock.IAMAPIMock{
 					ListMFADevicesFunc: func(in1 *iam.ListMFADevicesInput) (*iam.ListMFADevicesOutput, error) {
-						
+
 						output := &iam.ListMFADevicesOutput{
 							MFADevices: nil,
 						}
@@ -366,7 +301,7 @@ func Test_getIAMUserMFADevice(t *testing.T) {
 	}
 }
 
-func Test_generateSTSSessionCredentials(t *testing.T) {
+func Test_getSTSSessionToken(t *testing.T) {
 	type args struct {
 		stsInstance           stsiface.STSAPI
 		tokenCode             string
@@ -386,7 +321,7 @@ func Test_generateSTSSessionCredentials(t *testing.T) {
 						return &sts.GetSessionTokenOutput{}, nil
 					},
 				},
-				tokenCode: "123456",
+				tokenCode:             "123456",
 				mfaDeviceSerialNumber: "sfagstfey",
 			},
 			nil,
@@ -400,7 +335,7 @@ func Test_generateSTSSessionCredentials(t *testing.T) {
 						return nil, awserr.New("5000", "blah", xerrors.New("blah"))
 					},
 				},
-				tokenCode: "123456",
+				tokenCode:             "123456",
 				mfaDeviceSerialNumber: "sfagstfey",
 			},
 			nil,
@@ -414,7 +349,7 @@ func Test_generateSTSSessionCredentials(t *testing.T) {
 						return nil, awserr.New(sts.ErrCodeExpiredTokenException, "Blah", xerrors.New("blah"))
 					},
 				},
-				tokenCode: "123456",
+				tokenCode:             "123456",
 				mfaDeviceSerialNumber: "sfagstfey",
 			},
 			nil,
@@ -428,7 +363,7 @@ func Test_generateSTSSessionCredentials(t *testing.T) {
 						return nil, awserr.New(sts.ErrCodeInvalidIdentityTokenException, "Blah", xerrors.New("blah"))
 					},
 				},
-				tokenCode: "123456",
+				tokenCode:             "123456",
 				mfaDeviceSerialNumber: "sfagstfey",
 			},
 			nil,
@@ -442,7 +377,7 @@ func Test_generateSTSSessionCredentials(t *testing.T) {
 						return nil, xerrors.New("blah")
 					},
 				},
-				tokenCode: "123456",
+				tokenCode:             "123456",
 				mfaDeviceSerialNumber: "sfagstfey",
 			},
 			nil,
@@ -451,13 +386,87 @@ func Test_generateSTSSessionCredentials(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := generateSTSSessionCredentials(tt.args.stsInstance, tt.args.tokenCode, tt.args.mfaDeviceSerialNumber)
+			got, err := getSTSSessionToken(tt.args.stsInstance, tt.args.tokenCode, tt.args.mfaDeviceSerialNumber)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("generateSTSSessionCredentials() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("getSTSSessionToken() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("generateSTSSessionCredentials() = %v, want %v", got, tt.want)
+				t.Errorf("getSTSSessionToken() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_getSTSIdentity(t *testing.T) {
+	type args struct {
+		stsInstance stsiface.STSAPI
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *STSIdentity
+		wantErr bool
+	}{
+		{
+			"Valid/User",
+			args{
+				stsInstance: &stsmock.STSAPIMock{
+					GetCallerIdentityFunc: func(in1 *sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error) {
+
+						account := "342563637373"
+						arn := "ashgajsdhgajsdg"
+						userID := "asjkdhkasdhaksd"
+
+						return &sts.GetCallerIdentityOutput{
+							Account: &account,
+							Arn:     &arn,
+							UserId:  &userID,
+						}, nil
+					},
+				},
+			},
+			&STSIdentity{
+				Account: "342563637373",
+				ARN:     "ashgajsdhgajsdg",
+				UserID:  "asjkdhkasdhaksd",
+			},
+			false,
+		},
+		{
+			"Invaild/Error",
+			args{
+				stsInstance: &stsmock.STSAPIMock{
+					GetCallerIdentityFunc: func(in1 *sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error) {
+						return nil, xerrors.New("blah")
+					},
+				},
+			},
+			nil,
+			true,
+		},
+		{
+			"Invaild/awserrError",
+			args{
+				stsInstance: &stsmock.STSAPIMock{
+					GetCallerIdentityFunc: func(in1 *sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error) {
+						return nil, awserr.New("askjdhaksjhd", "Blah", xerrors.New("blah"))
+					},
+				},
+			},
+			nil,
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := getSTSIdentity(tt.args.stsInstance)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("getSTSIdentity() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("getSTSIdentity() = %v, want %v", got, tt.want)
 			}
 		})
 	}
