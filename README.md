@@ -17,8 +17,8 @@ Simple CLI tool which enables you to login and retrieve [AWS](https://aws.amazon
 
 ## Requirements
 
-* AWS IAM User account
 * Access Key and Secret Key stores $HOME/.aws/credentials
+* AWS IAM User account
 
 ## Install
 
@@ -50,28 +50,32 @@ Use "shell [command] --help" for more information about a command.
 
 If the `shell` sub-command is called, `mfa4aws` will output the following temporary security credentials:
 ```
-export AWS_ACCESS_KEY_ID="DDFHAFG....UOCA"
-export AWS_SECRET_ACCESS_KEY="JSKA...HJ2F"
-export AWS_SESSION_TOKEN="ZQ...1VVQ=="
-export AWS_SECURITY_TOKEN="ZQ...1VVQ=="
+export AWS_ACCESS_KEY_ID=DDFHAFG....UOCA
+export AWS_SECRET_ACCESS_KEY="JSKA...HJ2F
+export AWS_SESSION_TOKEN=ZQ...1VVQ==
+export AWS_SECURITY_TOKEN=ZQ...1VVQ==
+export X_PRINCIPAL_ARN=arn:aws:iam::3678236812376:user/johnsmith
+export EXPIRES=59m58.593852s
 ```
 
 If you use `eval $(mfa4aws shell)` frequently, you may want to create a alias for it:
 
 zsh:
 ```
-alias m4a="function(){eval $( $(command mfa4aws) shell --shell=bash --profile=$@);}"
+alias m4a="function(){eval $( $(command mfa4aws) shell --token=$@);}"
 ```
 
 bash:
 ```
-function m4a { eval $( $(which mfa4aws) shell --shell=bash --profile=$@); }
+function m4a { eval $( $(which mfa4aws) shell --token=$@); }
 ```
 
 
 ## Building
 
-TBA
+```
+make build
+```
 
 ## Environment vars
 
@@ -81,6 +85,8 @@ The exec sub command will export the following environment variables.
 * AWS_SECRET_ACCESS_KEY
 * AWS_SESSION_TOKEN
 * AWS_SECURITY_TOKEN
+* X_PRINCIPAL_ARN
+* EXPIRES
 
 # License
 
