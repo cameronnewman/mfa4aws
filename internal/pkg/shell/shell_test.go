@@ -1,62 +1,48 @@
 package shell
 
 import (
-	"mfa4aws/internal/pkg/awssts"
-	"reflect"
+	"bytes"
 	"testing"
 )
 
-func TestGenerateSTSKeysForExport(t *testing.T) {
-	type args struct {
-		profile   string
-		tokenCode string
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			GenerateSTSKeysForExport(tt.args.profile, tt.args.tokenCode)
-		})
-	}
-}
-
-func Test_credentialsToEnvExport(t *testing.T) {
-	type args struct {
-		creds *awssts.AWSCredentials
-	}
-	tests := []struct {
-		name        string
-		args        args
-		wantEnvVars []string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if gotEnvVars := credentialsToEnvExport(tt.args.creds); !reflect.DeepEqual(gotEnvVars, tt.wantEnvVars) {
-				t.Errorf("credentialsToEnvExport() = %v, want %v", gotEnvVars, tt.wantEnvVars)
-			}
-		})
-	}
-}
-
-func Test_printVars(t *testing.T) {
+func TestPrintVars(t *testing.T) {
 	type args struct {
 		vars []string
 	}
 	tests := []struct {
-		name string
-		args args
+		name    string
+		args    args
+		wantOut string
 	}{
-		// TODO: Add test cases.
+		{
+			"Invalid/EmptyCreds",
+			args{
+				vars: []string{},
+			},
+			"",
+		},
+		{
+			"Valid/SimpleString",
+			args{
+				vars: []string{"Hi", "John"},
+			},
+			"Hi\nJohn\n",
+		},
+		{
+			"Valid/ComplexString",
+			args{
+				vars: []string{"Hi", "世界"},
+			},
+			"Hi\n世界\n",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			printVars(tt.args.vars)
+			out := &bytes.Buffer{}
+			PrintVars(out, tt.args.vars)
+			if gotOut := out.String(); gotOut != tt.wantOut {
+				t.Errorf("PrintVars() = %v, want %v", gotOut, tt.wantOut)
+			}
 		})
 	}
 }
