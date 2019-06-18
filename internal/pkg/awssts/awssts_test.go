@@ -49,7 +49,33 @@ func TestGenerateSTSCredentials(t *testing.T) {
 		want    *AWSCredentials
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			"Invaild/NoVariables",
+			args{
+				profile: "",
+				tokenCode: "",
+			},
+			nil,
+			true,
+		},
+		{
+			"Invaild/InvaildProfile",
+			args{
+				profile: "akdjghakjsdhaksjdh",
+				tokenCode: "",
+			},
+			nil,
+			true,
+		},
+		{
+			"Invaild/InvaildTokenCode",
+			args{
+				profile: "",
+				tokenCode: "123",
+			},
+			nil,
+			true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
