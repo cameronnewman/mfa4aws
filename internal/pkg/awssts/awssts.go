@@ -1,20 +1,26 @@
 package awssts
 
 import (
+	"bytes"
 	"fmt"
-	"os"
 	"os/user"
 	"path/filepath"
 	"time"
 
 	"gopkg.in/ini.v1"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/aws/aws-sdk-go/service/sts/stsiface"
+
+	"github.com/spf13/afero"
+)
+
+var (
+	appFs = afero.NewOsFs()
 )
 
 // AWSCredentials represents the set of attributes used to authenticate to AWS with a short lived session
@@ -30,77 +36,63 @@ type AWSCredentials struct {
 //GenerateSTSCredentials created STS Credentials
 func GenerateSTSCredentials(profile string, tokenCode string) (*AWSCredentials, error) {
 
-	result := &AWSCredentials{}
+	user, err := user.Current()
+	if err != nil {
+		return nil, err
+	}
 
-	if err := checkProfile(profile); err != nil {
-		return result, err
+	path := filepath.Join(user.HomeDir, ".aws", "credentials")
+
+	f, err := openFile(path)
+	if err != nil {
+		return nil, ErrAWSCredentialsFileNotFound
+	}
+
+	if err := checkProfile(f, profile); err != nil {
+		return nil, err
 	}
 
 	if err := checkToken(tokenCode); err != nil {
-		return result, err
+		return nil, err
 	}
 
-	sess, err := createNewSession(profile)
+	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
+		Profile: profile,
+	}))
+
+	iamInstance := iam.New(awsSession)
+
+	iamUser, err := getIAMUserDetails(iamInstance)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
-	iamInstance := iam.New(sess)
-
-	user, err := iamInstance.GetUser(&iam.GetUserInput{})
+	mfaSerialNumber, err := getIAMUserMFADevice(iamInstance)
 	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			return result, fmt.Errorf("Unable to retrive user - %v", aerr.Message())
-		}
-		return result, fmt.Errorf("unknown error occurred, %v", err)
+		return nil, err
 	}
 
-	devices, err := iamInstance.ListMFADevices(&iam.ListMFADevicesInput{})
+	stsInstance := sts.New(awsSession)
+
+	stsSessionCredentials, err := generateSTSSessionCredentials(stsInstance, tokenCode, mfaSerialNumber)
 	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			return result, fmt.Errorf("Unable to retrive any MFA devices - %v", aerr.Message())
-		}
-		return result, fmt.Errorf("unknown error occurred, %v", err)
+		return nil, err
 	}
 
-	if len(devices.MFADevices) == 0 {
-		return result, ErrNoMFADeviceForUser
-	}
-
-	sn := devices.MFADevices[0].SerialNumber
-
-	_sts := sts.New(sess)
-	stsSession, err := _sts.GetSessionToken(&sts.GetSessionTokenInput{
-		TokenCode:    &tokenCode,
-		SerialNumber: sn,
-	})
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case sts.ErrCodeExpiredTokenException:
-				return result, ErrTokenHasExpired
-			case sts.ErrCodeInvalidIdentityTokenException:
-				return result, ErrInvalidToken
-			default:
-				return result, fmt.Errorf("%v For device %s", aerr.Message(), *sn)
-			}
-		}
-		return result, fmt.Errorf("unknown error occurred - %v For device %s", err, *sn)
-	}
-
-	result.AWSAccessKeyID = *stsSession.Credentials.AccessKeyId
-	result.AWSSecretAccessKey = *stsSession.Credentials.SecretAccessKey
-	result.AWSSessionToken = *stsSession.Credentials.SessionToken
-	result.AWSSecurityToken = *stsSession.Credentials.SessionToken
-	result.PrincipalARN = *user.User.Arn
-	result.Expires = time.Until(*stsSession.Credentials.Expiration)
-
-	return result, nil
+	return &AWSCredentials{
+		AWSAccessKeyID: *stsSessionCredentials.AccessKeyId,
+		AWSSecretAccessKey: *stsSessionCredentials.SecretAccessKey,
+		AWSSessionToken: *stsSessionCredentials.SecretAccessKey,
+		AWSSecurityToken: *stsSessionCredentials.SecretAccessKey,
+		PrincipalARN: *iamUser.Arn,
+		Expires: time.Until(*stsSessionCredentials.Expiration),
+	}, nil
 }
 
-func checkProfile(profile string) error {
+func checkProfile(file []byte, profile string) error {
 	const (
-		profileDefault                string = "default"
+		profileDefault string = "default"
+
 		credentialsAWSAccessKeyID     string = "aws_access_key_id"
 		credentialsAWSSecretAccessKey string = "aws_secret_access_key"
 	)
@@ -109,18 +101,7 @@ func checkProfile(profile string) error {
 		profile = profileDefault
 	}
 
-	user, err := user.Current()
-	if err != nil {
-		return err
-	}
-
-	path := filepath.Join(user.HomeDir, ".aws", "credentials")
-
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return ErrAWSCredentialsFileNotFound
-	}
-
-	creds, err := ini.Load(path)
+	creds, err := ini.Load(file)
 	if err != nil {
 		return ErrInvalidAWSCredentialsFile
 	}
@@ -133,6 +114,21 @@ func checkProfile(profile string) error {
 	return nil
 }
 
+func openFile(path string) ([]byte, error) {
+	f, err := appFs.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	buf := bytes.NewBuffer(nil)
+	_, err = buf.ReadFrom(f)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
 func checkToken(token string) error {
 
 	if len(token) <= 5 {
@@ -142,23 +138,53 @@ func checkToken(token string) error {
 	return nil
 }
 
-func createNewSession(profile string) (*session.Session, error) {
+func getIAMUserDetails(iamInstance iamiface.IAMAPI) (*iam.User, error) {
 
-	conf := &aws.Config{
-		Credentials: credentials.NewSharedCredentials("", profile),
+	identity, err := iamInstance.GetUser(&iam.GetUserInput{})
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			return nil, fmt.Errorf("Unable to retrive user - %v", aerr.Message())
+		}
+		return nil, fmt.Errorf("unknown error occurred, %v", err)
 	}
 
-	sess, err := session.NewSession(conf)
+	return identity.User, nil
+}
+
+func getIAMUserMFADevice(iamInstance iamiface.IAMAPI) (string, error) {
+	devices, err := iamInstance.ListMFADevices(&iam.ListMFADevicesInput{})
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			return "", fmt.Errorf("Unable to retrive any MFA devices - %v", aerr.Message())
+		}
+		return "", fmt.Errorf("unknown error occurred, %v", err)
+	}
+
+	if len(devices.MFADevices) == 0 {
+		return "", ErrNoMFADeviceForUser
+	}
+
+	return *devices.MFADevices[0].SerialNumber, nil
+}
+
+func generateSTSSessionCredentials(stsInstance stsiface.STSAPI, tokenCode string, mfaDeviceSerialNumber string) (*sts.Credentials, error) {
+	stsSession, err := stsInstance.GetSessionToken(&sts.GetSessionTokenInput{
+		TokenCode:    &tokenCode,
+		SerialNumber: &mfaDeviceSerialNumber,
+	})
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
-			case session.ErrCodeSharedConfig:
-				return &session.Session{}, ErrAWSCredentialsFileNotFound
+			case sts.ErrCodeExpiredTokenException:
+				return nil, ErrTokenHasExpired
+			case sts.ErrCodeInvalidIdentityTokenException:
+				return nil, ErrInvalidToken
 			default:
-				return &session.Session{}, fmt.Errorf("Unable to create an AWS session - %v", aerr.Message())
+				return nil, fmt.Errorf("%v For device %s", aerr.Message(), mfaDeviceSerialNumber)
 			}
 		}
-		return &session.Session{}, fmt.Errorf("unknown error occurred, %v", err)
+		return nil, fmt.Errorf("unknown error occurred - %v For device %s", err, mfaDeviceSerialNumber)
 	}
-	return sess, nil
+
+	return stsSession.Credentials, nil
 }
