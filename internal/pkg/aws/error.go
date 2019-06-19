@@ -1,4 +1,4 @@
-package awssts
+package aws
 
 import "golang.org/x/xerrors"
 

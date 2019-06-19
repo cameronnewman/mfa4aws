@@ -2,7 +2,7 @@ package shell
 
 import (
 	"fmt"
-	"mfa4aws/internal/pkg/awssts"
+	"mfa4aws/internal/pkg/aws"
 )
 
 const (
@@ -16,8 +16,8 @@ const (
 	bashExport string = "export"
 )
 
-//BuildEnvVars - constructs a string array from the AWSCredentials
-func BuildEnvVars(creds *awssts.AWSCredentials) (envVars []string) {
+//BuildEnvVars - constructs a string array from the Credentials
+func BuildEnvVars(creds *aws.Credentials) (envVars []string) {
 	envVars = append(envVars,
 		fmt.Sprintf("%s %s=%s", bashExport, envNameAWSAccessKey, creds.AWSAccessKeyID),
 		fmt.Sprintf("%s %s=%s", bashExport, envNameAWSSecretKey, creds.AWSSecretAccessKey),

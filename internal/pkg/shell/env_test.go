@@ -1,7 +1,7 @@
 package shell
 
 import (
-	"mfa4aws/internal/pkg/awssts"
+	"mfa4aws/internal/pkg/aws"
 	"reflect"
 	"testing"
 	"time"
@@ -9,7 +9,7 @@ import (
 
 func TestBuildEnvVars(t *testing.T) {
 	type args struct {
-		creds *awssts.AWSCredentials
+		creds *aws.Credentials
 	}
 	tests := []struct {
 		name        string
@@ -19,14 +19,14 @@ func TestBuildEnvVars(t *testing.T) {
 		{
 			"Invalid/EmptyCreds",
 			args{
-				creds: &awssts.AWSCredentials{},
+				creds: &aws.Credentials{},
 			},
 			[]string{"export AWS_ACCESS_KEY_ID=", "export AWS_SECRET_ACCESS_KEY=", "export AWS_SESSION_TOKEN=", "export AWS_SECURITY_TOKEN=", "export X_PRINCIPAL_ARN=", "export EXPIRES=0s"},
 		},
 		{
 			"Valid/Creds",
 			args{
-				creds: &awssts.AWSCredentials{
+				creds: &aws.Credentials{
 					AWSAccessKeyID:     "AHIAACNB4F5KCDQXSGYW4",
 					AWSSecretAccessKey: "Xoy7ogSQXyTyZI3Oqv8JdAkk1PsbSYzt/vqQ1v+9",
 					AWSSessionToken:    "FQoGZXIvYshgsSJHIOSLKj6nr0FOKIuOP68yKRKvPp3nj9MyaPcvN8PApmWd3yKuTJWf+u8hPmiDGIHAgDu5h+mVTdKL6B/gheTIjsqty9yn3it/2OoJNIhNfIPANfLwHnCSror+GDmS2Y/vZLjAThX0KKaM0/YcmUokHFMNrN+mAX8G21uAs0MUS4e5qzupfskjhskjhsk89797wZROPTk43ZharJLNf59hGVXnqHFwkxNatt/lKJH+pL0xScBr64qEb2ZaKOPonegF",

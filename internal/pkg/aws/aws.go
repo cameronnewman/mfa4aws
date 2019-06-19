@@ -1,4 +1,4 @@
-package awssts
+package aws
 
 import (
 	"bytes"
@@ -14,7 +14,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/aws/aws-sdk-go/service/sts/stsiface"
 
 	"github.com/spf13/afero"
 )
@@ -23,8 +22,8 @@ var (
 	appFs = afero.NewOsFs()
 )
 
-// AWSCredentials represents the set of attributes used to authenticate to AWS with a short lived session
-type AWSCredentials struct {
+//Credentials represents the set of attributes used to authenticate to AWS with a short lived session
+type Credentials struct {
 	AWSAccessKeyID     string        `ini:"aws_access_key_id"`
 	AWSSecretAccessKey string        `ini:"aws_secret_access_key"`
 	AWSSessionToken    string        `ini:"aws_session_token"`
@@ -33,22 +32,20 @@ type AWSCredentials struct {
 	Expires            time.Duration `ini:"x_security_token_expires"`
 }
 
-//STSIdentity represents the STS Identity
-type STSIdentity struct {
-	Account string
-	ARN     string
-	UserID  string
-}
-
 //GenerateSTSCredentials created STS Credentials
-func GenerateSTSCredentials(profile string, tokenCode string) (*AWSCredentials, error) {
+func GenerateSTSCredentials(profile string, tokenCode string) (*Credentials, error) {
+
+	const (
+		awsCredentialsFolder string = ".aws"
+		awsCredentialsFile   string = "credentials"
+	)
 
 	user, err := user.Current()
 	if err != nil {
 		return nil, err
 	}
 
-	path := filepath.Join(user.HomeDir, ".aws", "credentials")
+	path := filepath.Join(user.HomeDir, awsCredentialsFolder, awsCredentialsFile)
 
 	f, err := openFile(path)
 	if err != nil {
@@ -86,7 +83,7 @@ func GenerateSTSCredentials(profile string, tokenCode string) (*AWSCredentials, 
 		return nil, err
 	}
 
-	return &AWSCredentials{
+	return &Credentials{
 		AWSAccessKeyID:     *stsSessionCredentials.AccessKeyId,
 		AWSSecretAccessKey: *stsSessionCredentials.SecretAccessKey,
 		AWSSessionToken:    *stsSessionCredentials.SecretAccessKey,
@@ -158,42 +155,4 @@ func getIAMUserMFADevice(iamInstance iamiface.IAMAPI) (string, error) {
 	}
 
 	return *devices.MFADevices[0].SerialNumber, nil
-}
-
-func getSTSSessionToken(stsInstance stsiface.STSAPI, tokenCode string, mfaDeviceSerialNumber string) (*sts.Credentials, error) {
-	stsSession, err := stsInstance.GetSessionToken(&sts.GetSessionTokenInput{
-		TokenCode:    &tokenCode,
-		SerialNumber: &mfaDeviceSerialNumber,
-	})
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case sts.ErrCodeExpiredTokenException:
-				return nil, ErrTokenHasExpired
-			case sts.ErrCodeInvalidIdentityTokenException:
-				return nil, ErrInvalidToken
-			default:
-				return nil, fmt.Errorf("%v For device %s", aerr.Message(), mfaDeviceSerialNumber)
-			}
-		}
-		return nil, fmt.Errorf("unknown error occurred - %v For device %s", err, mfaDeviceSerialNumber)
-	}
-
-	return stsSession.Credentials, nil
-}
-
-func getSTSIdentity(stsInstance stsiface.STSAPI) (*STSIdentity, error) {
-	identity, err := stsInstance.GetCallerIdentity(&sts.GetCallerIdentityInput{})
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			return nil, fmt.Errorf("Unable to retrive user - %v", aerr.Message())
-		}
-		return nil, fmt.Errorf("unknown error occurred, %v", err)
-	}
-
-	return &STSIdentity{
-		Account: *identity.Account,
-		ARN:     *identity.Arn,
-		UserID:  *identity.UserId,
-	}, nil
 }
