@@ -8,7 +8,6 @@ Simple CLI tool which enables you to login and retrieve [AWS](https://aws.amazon
 - [Requirements](#requirements)
 - [Install](#install)
     - [OSX](#osx)
-- [Dependency Setup](#dependency-setup)
 - [Usage](#usage)
     - [`mfa4aws shell`](#mfa4aws-shell)
 - [Example](#example)
