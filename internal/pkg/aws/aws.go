@@ -8,6 +8,8 @@ import (
 
 	"gopkg.in/ini.v1"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
@@ -58,7 +60,9 @@ func GenerateSTSCredentials(profile string, tokenCode string) (*Credentials, err
 	}
 
 	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
-		Profile: profile,
+		Config: aws.Config{
+			Credentials: credentials.NewSharedCredentials(path, profile),
+		},
 	}))
 
 	iamInstance := iam.New(awsSession)
