@@ -74,6 +74,24 @@ func TestGenerateSTSCredentials(t *testing.T) {
 			nil,
 			true,
 		},
+		{
+			"Vaild/EmptyProfileAndVaildTokenCode",
+			args{
+				profile:   "",
+				tokenCode: "1234564",
+			},
+			nil,
+			true,
+		},
+		{
+			"Vaild/VaildProfileAndVaildTokenCode",
+			args{
+				profile:   "default",
+				tokenCode: "1234564",
+			},
+			nil,
+			true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
