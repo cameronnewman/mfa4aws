@@ -2,17 +2,14 @@ package aws
 
 import (
 	"bytes"
-	"fmt"
 	"os/user"
 	"path/filepath"
 	"time"
 
 	"gopkg.in/ini.v1"
 
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/aws/aws-sdk-go/service/iam/iamiface"
 	"github.com/aws/aws-sdk-go/service/sts"
 
 	"github.com/spf13/afero"
@@ -72,7 +69,6 @@ func GenerateSTSCredentials(profile string, tokenCode string) (*Credentials, err
 	}
 
 	stsInstance := sts.New(awsSession)
-
 	stsSessionCredentials, err := getSTSSessionToken(stsInstance, tokenCode, mfaSerialNumber)
 	if err != nil {
 		return nil, err
@@ -139,20 +135,4 @@ func validateToken(token string) error {
 	}
 
 	return nil
-}
-
-func getIAMUserMFADevice(iamInstance iamiface.IAMAPI) (string, error) {
-	devices, err := iamInstance.ListMFADevices(&iam.ListMFADevicesInput{})
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			return "", fmt.Errorf("Unable to retrive any MFA devices - %v", aerr.Message())
-		}
-		return "", fmt.Errorf("unknown error occurred, %v", err)
-	}
-
-	if len(devices.MFADevices) == 0 {
-		return "", ErrNoMFADeviceForUser
-	}
-
-	return *devices.MFADevices[0].SerialNumber, nil
 }

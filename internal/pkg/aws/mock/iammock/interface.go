@@ -5,10 +5,11 @@ package iammock
 
 import (
 	"context"
+	"sync"
+
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/iam/iamiface"
-	"sync"
 )
 
 var (
@@ -162,6 +163,9 @@ var (
 	lockIAMAPIMockGenerateCredentialReport                             sync.RWMutex
 	lockIAMAPIMockGenerateCredentialReportRequest                      sync.RWMutex
 	lockIAMAPIMockGenerateCredentialReportWithContext                  sync.RWMutex
+	lockIAMAPIMockGenerateOrganizationsAccessReport                    sync.RWMutex
+	lockIAMAPIMockGenerateOrganizationsAccessReportRequest             sync.RWMutex
+	lockIAMAPIMockGenerateOrganizationsAccessReportWithContext         sync.RWMutex
 	lockIAMAPIMockGenerateServiceLastAccessedDetails                   sync.RWMutex
 	lockIAMAPIMockGenerateServiceLastAccessedDetailsRequest            sync.RWMutex
 	lockIAMAPIMockGenerateServiceLastAccessedDetailsWithContext        sync.RWMutex
@@ -205,6 +209,9 @@ var (
 	lockIAMAPIMockGetOpenIDConnectProvider                             sync.RWMutex
 	lockIAMAPIMockGetOpenIDConnectProviderRequest                      sync.RWMutex
 	lockIAMAPIMockGetOpenIDConnectProviderWithContext                  sync.RWMutex
+	lockIAMAPIMockGetOrganizationsAccessReport                         sync.RWMutex
+	lockIAMAPIMockGetOrganizationsAccessReportRequest                  sync.RWMutex
+	lockIAMAPIMockGetOrganizationsAccessReportWithContext              sync.RWMutex
 	lockIAMAPIMockGetPolicy                                            sync.RWMutex
 	lockIAMAPIMockGetPolicyRequest                                     sync.RWMutex
 	lockIAMAPIMockGetPolicyVersion                                     sync.RWMutex
@@ -948,6 +955,15 @@ var _ iamiface.IAMAPI = &IAMAPIMock{}
 //             GenerateCredentialReportWithContextFunc: func(in1 context.Context, in2 *iam.GenerateCredentialReportInput, in3 ...request.Option) (*iam.GenerateCredentialReportOutput, error) {
 // 	               panic("mock out the GenerateCredentialReportWithContext method")
 //             },
+//             GenerateOrganizationsAccessReportFunc: func(in1 *iam.GenerateOrganizationsAccessReportInput) (*iam.GenerateOrganizationsAccessReportOutput, error) {
+// 	               panic("mock out the GenerateOrganizationsAccessReport method")
+//             },
+//             GenerateOrganizationsAccessReportRequestFunc: func(in1 *iam.GenerateOrganizationsAccessReportInput) (*request.Request, *iam.GenerateOrganizationsAccessReportOutput) {
+// 	               panic("mock out the GenerateOrganizationsAccessReportRequest method")
+//             },
+//             GenerateOrganizationsAccessReportWithContextFunc: func(in1 context.Context, in2 *iam.GenerateOrganizationsAccessReportInput, in3 ...request.Option) (*iam.GenerateOrganizationsAccessReportOutput, error) {
+// 	               panic("mock out the GenerateOrganizationsAccessReportWithContext method")
+//             },
 //             GenerateServiceLastAccessedDetailsFunc: func(in1 *iam.GenerateServiceLastAccessedDetailsInput) (*iam.GenerateServiceLastAccessedDetailsOutput, error) {
 // 	               panic("mock out the GenerateServiceLastAccessedDetails method")
 //             },
@@ -1076,6 +1092,15 @@ var _ iamiface.IAMAPI = &IAMAPIMock{}
 //             },
 //             GetOpenIDConnectProviderWithContextFunc: func(in1 context.Context, in2 *iam.GetOpenIDConnectProviderInput, in3 ...request.Option) (*iam.GetOpenIDConnectProviderOutput, error) {
 // 	               panic("mock out the GetOpenIDConnectProviderWithContext method")
+//             },
+//             GetOrganizationsAccessReportFunc: func(in1 *iam.GetOrganizationsAccessReportInput) (*iam.GetOrganizationsAccessReportOutput, error) {
+// 	               panic("mock out the GetOrganizationsAccessReport method")
+//             },
+//             GetOrganizationsAccessReportRequestFunc: func(in1 *iam.GetOrganizationsAccessReportInput) (*request.Request, *iam.GetOrganizationsAccessReportOutput) {
+// 	               panic("mock out the GetOrganizationsAccessReportRequest method")
+//             },
+//             GetOrganizationsAccessReportWithContextFunc: func(in1 context.Context, in2 *iam.GetOrganizationsAccessReportInput, in3 ...request.Option) (*iam.GetOrganizationsAccessReportOutput, error) {
+// 	               panic("mock out the GetOrganizationsAccessReportWithContext method")
 //             },
 //             GetPolicyFunc: func(in1 *iam.GetPolicyInput) (*iam.GetPolicyOutput, error) {
 // 	               panic("mock out the GetPolicy method")
@@ -2377,6 +2402,15 @@ type IAMAPIMock struct {
 	// GenerateCredentialReportWithContextFunc mocks the GenerateCredentialReportWithContext method.
 	GenerateCredentialReportWithContextFunc func(in1 context.Context, in2 *iam.GenerateCredentialReportInput, in3 ...request.Option) (*iam.GenerateCredentialReportOutput, error)
 
+	// GenerateOrganizationsAccessReportFunc mocks the GenerateOrganizationsAccessReport method.
+	GenerateOrganizationsAccessReportFunc func(in1 *iam.GenerateOrganizationsAccessReportInput) (*iam.GenerateOrganizationsAccessReportOutput, error)
+
+	// GenerateOrganizationsAccessReportRequestFunc mocks the GenerateOrganizationsAccessReportRequest method.
+	GenerateOrganizationsAccessReportRequestFunc func(in1 *iam.GenerateOrganizationsAccessReportInput) (*request.Request, *iam.GenerateOrganizationsAccessReportOutput)
+
+	// GenerateOrganizationsAccessReportWithContextFunc mocks the GenerateOrganizationsAccessReportWithContext method.
+	GenerateOrganizationsAccessReportWithContextFunc func(in1 context.Context, in2 *iam.GenerateOrganizationsAccessReportInput, in3 ...request.Option) (*iam.GenerateOrganizationsAccessReportOutput, error)
+
 	// GenerateServiceLastAccessedDetailsFunc mocks the GenerateServiceLastAccessedDetails method.
 	GenerateServiceLastAccessedDetailsFunc func(in1 *iam.GenerateServiceLastAccessedDetailsInput) (*iam.GenerateServiceLastAccessedDetailsOutput, error)
 
@@ -2505,6 +2539,15 @@ type IAMAPIMock struct {
 
 	// GetOpenIDConnectProviderWithContextFunc mocks the GetOpenIDConnectProviderWithContext method.
 	GetOpenIDConnectProviderWithContextFunc func(in1 context.Context, in2 *iam.GetOpenIDConnectProviderInput, in3 ...request.Option) (*iam.GetOpenIDConnectProviderOutput, error)
+
+	// GetOrganizationsAccessReportFunc mocks the GetOrganizationsAccessReport method.
+	GetOrganizationsAccessReportFunc func(in1 *iam.GetOrganizationsAccessReportInput) (*iam.GetOrganizationsAccessReportOutput, error)
+
+	// GetOrganizationsAccessReportRequestFunc mocks the GetOrganizationsAccessReportRequest method.
+	GetOrganizationsAccessReportRequestFunc func(in1 *iam.GetOrganizationsAccessReportInput) (*request.Request, *iam.GetOrganizationsAccessReportOutput)
+
+	// GetOrganizationsAccessReportWithContextFunc mocks the GetOrganizationsAccessReportWithContext method.
+	GetOrganizationsAccessReportWithContextFunc func(in1 context.Context, in2 *iam.GetOrganizationsAccessReportInput, in3 ...request.Option) (*iam.GetOrganizationsAccessReportOutput, error)
 
 	// GetPolicyFunc mocks the GetPolicy method.
 	GetPolicyFunc func(in1 *iam.GetPolicyInput) (*iam.GetPolicyOutput, error)
@@ -4301,6 +4344,25 @@ type IAMAPIMock struct {
 			// In3 is the in3 argument value.
 			In3 []request.Option
 		}
+		// GenerateOrganizationsAccessReport holds details about calls to the GenerateOrganizationsAccessReport method.
+		GenerateOrganizationsAccessReport []struct {
+			// In1 is the in1 argument value.
+			In1 *iam.GenerateOrganizationsAccessReportInput
+		}
+		// GenerateOrganizationsAccessReportRequest holds details about calls to the GenerateOrganizationsAccessReportRequest method.
+		GenerateOrganizationsAccessReportRequest []struct {
+			// In1 is the in1 argument value.
+			In1 *iam.GenerateOrganizationsAccessReportInput
+		}
+		// GenerateOrganizationsAccessReportWithContext holds details about calls to the GenerateOrganizationsAccessReportWithContext method.
+		GenerateOrganizationsAccessReportWithContext []struct {
+			// In1 is the in1 argument value.
+			In1 context.Context
+			// In2 is the in2 argument value.
+			In2 *iam.GenerateOrganizationsAccessReportInput
+			// In3 is the in3 argument value.
+			In3 []request.Option
+		}
 		// GenerateServiceLastAccessedDetails holds details about calls to the GenerateServiceLastAccessedDetails method.
 		GenerateServiceLastAccessedDetails []struct {
 			// In1 is the in1 argument value.
@@ -4581,6 +4643,25 @@ type IAMAPIMock struct {
 			In1 context.Context
 			// In2 is the in2 argument value.
 			In2 *iam.GetOpenIDConnectProviderInput
+			// In3 is the in3 argument value.
+			In3 []request.Option
+		}
+		// GetOrganizationsAccessReport holds details about calls to the GetOrganizationsAccessReport method.
+		GetOrganizationsAccessReport []struct {
+			// In1 is the in1 argument value.
+			In1 *iam.GetOrganizationsAccessReportInput
+		}
+		// GetOrganizationsAccessReportRequest holds details about calls to the GetOrganizationsAccessReportRequest method.
+		GetOrganizationsAccessReportRequest []struct {
+			// In1 is the in1 argument value.
+			In1 *iam.GetOrganizationsAccessReportInput
+		}
+		// GetOrganizationsAccessReportWithContext holds details about calls to the GetOrganizationsAccessReportWithContext method.
+		GetOrganizationsAccessReportWithContext []struct {
+			// In1 is the in1 argument value.
+			In1 context.Context
+			// In2 is the in2 argument value.
+			In2 *iam.GetOrganizationsAccessReportInput
 			// In3 is the in3 argument value.
 			In3 []request.Option
 		}
@@ -11550,6 +11631,107 @@ func (mock *IAMAPIMock) GenerateCredentialReportWithContextCalls() []struct {
 	return calls
 }
 
+// GenerateOrganizationsAccessReport calls GenerateOrganizationsAccessReportFunc.
+func (mock *IAMAPIMock) GenerateOrganizationsAccessReport(in1 *iam.GenerateOrganizationsAccessReportInput) (*iam.GenerateOrganizationsAccessReportOutput, error) {
+	if mock.GenerateOrganizationsAccessReportFunc == nil {
+		panic("IAMAPIMock.GenerateOrganizationsAccessReportFunc: method is nil but IAMAPI.GenerateOrganizationsAccessReport was just called")
+	}
+	callInfo := struct {
+		In1 *iam.GenerateOrganizationsAccessReportInput
+	}{
+		In1: in1,
+	}
+	lockIAMAPIMockGenerateOrganizationsAccessReport.Lock()
+	mock.calls.GenerateOrganizationsAccessReport = append(mock.calls.GenerateOrganizationsAccessReport, callInfo)
+	lockIAMAPIMockGenerateOrganizationsAccessReport.Unlock()
+	return mock.GenerateOrganizationsAccessReportFunc(in1)
+}
+
+// GenerateOrganizationsAccessReportCalls gets all the calls that were made to GenerateOrganizationsAccessReport.
+// Check the length with:
+//     len(mockedIAMAPI.GenerateOrganizationsAccessReportCalls())
+func (mock *IAMAPIMock) GenerateOrganizationsAccessReportCalls() []struct {
+	In1 *iam.GenerateOrganizationsAccessReportInput
+} {
+	var calls []struct {
+		In1 *iam.GenerateOrganizationsAccessReportInput
+	}
+	lockIAMAPIMockGenerateOrganizationsAccessReport.RLock()
+	calls = mock.calls.GenerateOrganizationsAccessReport
+	lockIAMAPIMockGenerateOrganizationsAccessReport.RUnlock()
+	return calls
+}
+
+// GenerateOrganizationsAccessReportRequest calls GenerateOrganizationsAccessReportRequestFunc.
+func (mock *IAMAPIMock) GenerateOrganizationsAccessReportRequest(in1 *iam.GenerateOrganizationsAccessReportInput) (*request.Request, *iam.GenerateOrganizationsAccessReportOutput) {
+	if mock.GenerateOrganizationsAccessReportRequestFunc == nil {
+		panic("IAMAPIMock.GenerateOrganizationsAccessReportRequestFunc: method is nil but IAMAPI.GenerateOrganizationsAccessReportRequest was just called")
+	}
+	callInfo := struct {
+		In1 *iam.GenerateOrganizationsAccessReportInput
+	}{
+		In1: in1,
+	}
+	lockIAMAPIMockGenerateOrganizationsAccessReportRequest.Lock()
+	mock.calls.GenerateOrganizationsAccessReportRequest = append(mock.calls.GenerateOrganizationsAccessReportRequest, callInfo)
+	lockIAMAPIMockGenerateOrganizationsAccessReportRequest.Unlock()
+	return mock.GenerateOrganizationsAccessReportRequestFunc(in1)
+}
+
+// GenerateOrganizationsAccessReportRequestCalls gets all the calls that were made to GenerateOrganizationsAccessReportRequest.
+// Check the length with:
+//     len(mockedIAMAPI.GenerateOrganizationsAccessReportRequestCalls())
+func (mock *IAMAPIMock) GenerateOrganizationsAccessReportRequestCalls() []struct {
+	In1 *iam.GenerateOrganizationsAccessReportInput
+} {
+	var calls []struct {
+		In1 *iam.GenerateOrganizationsAccessReportInput
+	}
+	lockIAMAPIMockGenerateOrganizationsAccessReportRequest.RLock()
+	calls = mock.calls.GenerateOrganizationsAccessReportRequest
+	lockIAMAPIMockGenerateOrganizationsAccessReportRequest.RUnlock()
+	return calls
+}
+
+// GenerateOrganizationsAccessReportWithContext calls GenerateOrganizationsAccessReportWithContextFunc.
+func (mock *IAMAPIMock) GenerateOrganizationsAccessReportWithContext(in1 context.Context, in2 *iam.GenerateOrganizationsAccessReportInput, in3 ...request.Option) (*iam.GenerateOrganizationsAccessReportOutput, error) {
+	if mock.GenerateOrganizationsAccessReportWithContextFunc == nil {
+		panic("IAMAPIMock.GenerateOrganizationsAccessReportWithContextFunc: method is nil but IAMAPI.GenerateOrganizationsAccessReportWithContext was just called")
+	}
+	callInfo := struct {
+		In1 context.Context
+		In2 *iam.GenerateOrganizationsAccessReportInput
+		In3 []request.Option
+	}{
+		In1: in1,
+		In2: in2,
+		In3: in3,
+	}
+	lockIAMAPIMockGenerateOrganizationsAccessReportWithContext.Lock()
+	mock.calls.GenerateOrganizationsAccessReportWithContext = append(mock.calls.GenerateOrganizationsAccessReportWithContext, callInfo)
+	lockIAMAPIMockGenerateOrganizationsAccessReportWithContext.Unlock()
+	return mock.GenerateOrganizationsAccessReportWithContextFunc(in1, in2, in3...)
+}
+
+// GenerateOrganizationsAccessReportWithContextCalls gets all the calls that were made to GenerateOrganizationsAccessReportWithContext.
+// Check the length with:
+//     len(mockedIAMAPI.GenerateOrganizationsAccessReportWithContextCalls())
+func (mock *IAMAPIMock) GenerateOrganizationsAccessReportWithContextCalls() []struct {
+	In1 context.Context
+	In2 *iam.GenerateOrganizationsAccessReportInput
+	In3 []request.Option
+} {
+	var calls []struct {
+		In1 context.Context
+		In2 *iam.GenerateOrganizationsAccessReportInput
+		In3 []request.Option
+	}
+	lockIAMAPIMockGenerateOrganizationsAccessReportWithContext.RLock()
+	calls = mock.calls.GenerateOrganizationsAccessReportWithContext
+	lockIAMAPIMockGenerateOrganizationsAccessReportWithContext.RUnlock()
+	return calls
+}
+
 // GenerateServiceLastAccessedDetails calls GenerateServiceLastAccessedDetailsFunc.
 func (mock *IAMAPIMock) GenerateServiceLastAccessedDetails(in1 *iam.GenerateServiceLastAccessedDetailsInput) (*iam.GenerateServiceLastAccessedDetailsOutput, error) {
 	if mock.GenerateServiceLastAccessedDetailsFunc == nil {
@@ -13016,6 +13198,107 @@ func (mock *IAMAPIMock) GetOpenIDConnectProviderWithContextCalls() []struct {
 	lockIAMAPIMockGetOpenIDConnectProviderWithContext.RLock()
 	calls = mock.calls.GetOpenIDConnectProviderWithContext
 	lockIAMAPIMockGetOpenIDConnectProviderWithContext.RUnlock()
+	return calls
+}
+
+// GetOrganizationsAccessReport calls GetOrganizationsAccessReportFunc.
+func (mock *IAMAPIMock) GetOrganizationsAccessReport(in1 *iam.GetOrganizationsAccessReportInput) (*iam.GetOrganizationsAccessReportOutput, error) {
+	if mock.GetOrganizationsAccessReportFunc == nil {
+		panic("IAMAPIMock.GetOrganizationsAccessReportFunc: method is nil but IAMAPI.GetOrganizationsAccessReport was just called")
+	}
+	callInfo := struct {
+		In1 *iam.GetOrganizationsAccessReportInput
+	}{
+		In1: in1,
+	}
+	lockIAMAPIMockGetOrganizationsAccessReport.Lock()
+	mock.calls.GetOrganizationsAccessReport = append(mock.calls.GetOrganizationsAccessReport, callInfo)
+	lockIAMAPIMockGetOrganizationsAccessReport.Unlock()
+	return mock.GetOrganizationsAccessReportFunc(in1)
+}
+
+// GetOrganizationsAccessReportCalls gets all the calls that were made to GetOrganizationsAccessReport.
+// Check the length with:
+//     len(mockedIAMAPI.GetOrganizationsAccessReportCalls())
+func (mock *IAMAPIMock) GetOrganizationsAccessReportCalls() []struct {
+	In1 *iam.GetOrganizationsAccessReportInput
+} {
+	var calls []struct {
+		In1 *iam.GetOrganizationsAccessReportInput
+	}
+	lockIAMAPIMockGetOrganizationsAccessReport.RLock()
+	calls = mock.calls.GetOrganizationsAccessReport
+	lockIAMAPIMockGetOrganizationsAccessReport.RUnlock()
+	return calls
+}
+
+// GetOrganizationsAccessReportRequest calls GetOrganizationsAccessReportRequestFunc.
+func (mock *IAMAPIMock) GetOrganizationsAccessReportRequest(in1 *iam.GetOrganizationsAccessReportInput) (*request.Request, *iam.GetOrganizationsAccessReportOutput) {
+	if mock.GetOrganizationsAccessReportRequestFunc == nil {
+		panic("IAMAPIMock.GetOrganizationsAccessReportRequestFunc: method is nil but IAMAPI.GetOrganizationsAccessReportRequest was just called")
+	}
+	callInfo := struct {
+		In1 *iam.GetOrganizationsAccessReportInput
+	}{
+		In1: in1,
+	}
+	lockIAMAPIMockGetOrganizationsAccessReportRequest.Lock()
+	mock.calls.GetOrganizationsAccessReportRequest = append(mock.calls.GetOrganizationsAccessReportRequest, callInfo)
+	lockIAMAPIMockGetOrganizationsAccessReportRequest.Unlock()
+	return mock.GetOrganizationsAccessReportRequestFunc(in1)
+}
+
+// GetOrganizationsAccessReportRequestCalls gets all the calls that were made to GetOrganizationsAccessReportRequest.
+// Check the length with:
+//     len(mockedIAMAPI.GetOrganizationsAccessReportRequestCalls())
+func (mock *IAMAPIMock) GetOrganizationsAccessReportRequestCalls() []struct {
+	In1 *iam.GetOrganizationsAccessReportInput
+} {
+	var calls []struct {
+		In1 *iam.GetOrganizationsAccessReportInput
+	}
+	lockIAMAPIMockGetOrganizationsAccessReportRequest.RLock()
+	calls = mock.calls.GetOrganizationsAccessReportRequest
+	lockIAMAPIMockGetOrganizationsAccessReportRequest.RUnlock()
+	return calls
+}
+
+// GetOrganizationsAccessReportWithContext calls GetOrganizationsAccessReportWithContextFunc.
+func (mock *IAMAPIMock) GetOrganizationsAccessReportWithContext(in1 context.Context, in2 *iam.GetOrganizationsAccessReportInput, in3 ...request.Option) (*iam.GetOrganizationsAccessReportOutput, error) {
+	if mock.GetOrganizationsAccessReportWithContextFunc == nil {
+		panic("IAMAPIMock.GetOrganizationsAccessReportWithContextFunc: method is nil but IAMAPI.GetOrganizationsAccessReportWithContext was just called")
+	}
+	callInfo := struct {
+		In1 context.Context
+		In2 *iam.GetOrganizationsAccessReportInput
+		In3 []request.Option
+	}{
+		In1: in1,
+		In2: in2,
+		In3: in3,
+	}
+	lockIAMAPIMockGetOrganizationsAccessReportWithContext.Lock()
+	mock.calls.GetOrganizationsAccessReportWithContext = append(mock.calls.GetOrganizationsAccessReportWithContext, callInfo)
+	lockIAMAPIMockGetOrganizationsAccessReportWithContext.Unlock()
+	return mock.GetOrganizationsAccessReportWithContextFunc(in1, in2, in3...)
+}
+
+// GetOrganizationsAccessReportWithContextCalls gets all the calls that were made to GetOrganizationsAccessReportWithContext.
+// Check the length with:
+//     len(mockedIAMAPI.GetOrganizationsAccessReportWithContextCalls())
+func (mock *IAMAPIMock) GetOrganizationsAccessReportWithContextCalls() []struct {
+	In1 context.Context
+	In2 *iam.GetOrganizationsAccessReportInput
+	In3 []request.Option
+} {
+	var calls []struct {
+		In1 context.Context
+		In2 *iam.GetOrganizationsAccessReportInput
+		In3 []request.Option
+	}
+	lockIAMAPIMockGetOrganizationsAccessReportWithContext.RLock()
+	calls = mock.calls.GetOrganizationsAccessReportWithContext
+	lockIAMAPIMockGetOrganizationsAccessReportWithContext.RUnlock()
 	return calls
 }
 
