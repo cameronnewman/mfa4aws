@@ -5,10 +5,11 @@ package stsmock
 
 import (
 	"context"
+	"sync"
+
 	"github.com/aws/aws-sdk-go/aws/request"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/aws/aws-sdk-go/service/sts/stsiface"
-	"sync"
 )
 
 var (
