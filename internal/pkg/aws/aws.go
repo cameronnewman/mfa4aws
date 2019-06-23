@@ -86,8 +86,8 @@ func GenerateSTSCredentials(profile string, tokenCode string) (*Credentials, err
 	return &Credentials{
 		AWSAccessKeyID:     *stsSessionCredentials.AccessKeyId,
 		AWSSecretAccessKey: *stsSessionCredentials.SecretAccessKey,
-		AWSSessionToken:    *stsSessionCredentials.SecretAccessKey,
-		AWSSecurityToken:   *stsSessionCredentials.SecretAccessKey,
+		AWSSessionToken:    *stsSessionCredentials.SessionToken,
+		AWSSecurityToken:   *stsSessionCredentials.SessionToken,
 		PrincipalARN:       identity.ARN,
 		Expires:            time.Until(*stsSessionCredentials.Expiration),
 	}, nil
