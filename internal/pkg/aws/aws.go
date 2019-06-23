@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"os/user"
 	"path/filepath"
+	"regexp"
 	"time"
 
 	"gopkg.in/ini.v1"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
@@ -15,8 +18,14 @@ import (
 	"github.com/spf13/afero"
 )
 
+const (
+	tokenValidationRegex string = "^[0-9]+$"
+)
+
 var (
 	appFs = afero.NewOsFs()
+
+	tokenValidationRegexComplied = regexp.MustCompilePOSIX(tokenValidationRegex)
 )
 
 //Credentials represents the set of attributes used to authenticate to AWS with a short lived session
@@ -58,7 +67,9 @@ func GenerateSTSCredentials(profile string, tokenCode string) (*Credentials, err
 	}
 
 	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
-		Profile: profile,
+		Config: aws.Config{
+			Credentials: credentials.NewSharedCredentials(path, profile),
+		},
 	}))
 
 	iamInstance := iam.New(awsSession)
@@ -131,6 +142,9 @@ func openFile(path string) ([]byte, error) {
 
 func validateToken(token string) error {
 	if len(token) <= 5 {
+		return ErrInvalidToken
+	}
+	if !tokenValidationRegexComplied.MatchString(token) {
 		return ErrInvalidToken
 	}
 

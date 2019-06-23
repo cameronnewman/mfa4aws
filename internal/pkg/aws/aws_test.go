@@ -235,6 +235,20 @@ func Test_validateToken(t *testing.T) {
 			true,
 		},
 		{
+			"Invalid/NotNumbers",
+			args{
+				token: "23ss21",
+			},
+			true,
+		},
+		{
+			"Invalid/NotNumbersLong",
+			args{
+				token: "5364f'[73",
+			},
+			true,
+		},
+		{
 			"Valid/Token",
 			args{
 				token: "1234532",
