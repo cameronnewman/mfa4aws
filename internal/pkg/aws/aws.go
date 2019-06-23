@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os/user"
 	"path/filepath"
+	"regexp"
 	"time"
 
 	"gopkg.in/ini.v1"
@@ -17,8 +18,14 @@ import (
 	"github.com/spf13/afero"
 )
 
+const (
+	tokenValidationRegex string = "^[0-9]+$"
+)
+
 var (
 	appFs = afero.NewOsFs()
+
+	tokenValidationRegexComplied = regexp.MustCompilePOSIX(tokenValidationRegex)
 )
 
 //Credentials represents the set of attributes used to authenticate to AWS with a short lived session
@@ -135,6 +142,9 @@ func openFile(path string) ([]byte, error) {
 
 func validateToken(token string) error {
 	if len(token) <= 5 {
+		return ErrInvalidToken
+	}
+	if !tokenValidationRegexComplied.MatchString(token) {
 		return ErrInvalidToken
 	}
 
