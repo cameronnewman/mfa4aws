@@ -57,18 +57,19 @@ func openFile(path string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func createSession(profile string) (*session.Session, error) {
+func createSession(path string, profile string) (*session.Session, error) {
 	const (
 		awsCredentialsFolder string = ".aws"
 		awsCredentialsFile   string = "credentials"
 	)
 
-	user, err := user.Current()
-	if err != nil {
-		return nil, err
+	if len(path) == 0 {
+		user, err := user.Current()
+		if err != nil {
+			return nil, err
+		}
+		path = filepath.Join(user.HomeDir, awsCredentialsFolder, awsCredentialsFile)
 	}
-
-	path := filepath.Join(user.HomeDir, awsCredentialsFolder, awsCredentialsFile)
 
 	f, err := openFile(path)
 	if err != nil {

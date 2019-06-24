@@ -119,6 +119,7 @@ func Test_openFile(t *testing.T) {
 
 func Test_createSessions(t *testing.T) {
 	type args struct {
+		path    string
 		profile string
 	}
 	tests := []struct {
@@ -129,13 +130,31 @@ func Test_createSessions(t *testing.T) {
 		{
 			"Vaild/NoVariables",
 			args{
+				path:    "",
 				profile: "",
 			},
 			false,
 		},
 		{
+			"Invaild/InvaildPath",
+			args{
+				path:    "/shhss/ssjjss",
+				profile: "",
+			},
+			true,
+		},
+		{
+			"Invaild/InvaildPathInvaildProfile",
+			args{
+				path:    "/shhss/ssjjss",
+				profile: "daskdjhaskdjhsd",
+			},
+			true,
+		},
+		{
 			"Invaild/InvaildProfile",
 			args{
+				path:    "",
 				profile: "akdjghakjsdhaksjdh",
 			},
 			true,
@@ -143,6 +162,7 @@ func Test_createSessions(t *testing.T) {
 		{
 			"Vaild/VaildProfile",
 			args{
+				path:    "",
 				profile: "default",
 			},
 			false,
@@ -150,7 +170,7 @@ func Test_createSessions(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := createSession(tt.args.profile)
+			_, err := createSession(tt.args.path, tt.args.profile)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("createSession() error = %v, wantErr %v", err, tt.wantErr)
 				return

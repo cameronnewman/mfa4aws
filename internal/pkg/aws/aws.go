@@ -20,7 +20,7 @@ type Credentials struct {
 //GenerateSTSCredentials created STS Credentials
 func GenerateSTSCredentials(profile string, tokenCode string) (*Credentials, error) {
 
-	awsSession, err := createSession(profile)
+	awsSession, err := createSession("", profile)
 	if err != nil {
 		return nil, err
 	}
