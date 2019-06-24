@@ -14,6 +14,60 @@ import (
 	"golang.org/x/xerrors"
 )
 
+func Test_validateToken(t *testing.T) {
+	type args struct {
+		token string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			"Invalid/EmptyToken",
+			args{
+				token: "",
+			},
+			true,
+		},
+		{
+			"Invalid/ShortToken",
+			args{
+				token: "2321",
+			},
+			true,
+		},
+		{
+			"Invalid/NotNumbers",
+			args{
+				token: "23ss21",
+			},
+			true,
+		},
+		{
+			"Invalid/NotNumbersLong",
+			args{
+				token: "5364f'[73",
+			},
+			true,
+		},
+		{
+			"Valid/Token",
+			args{
+				token: "1234532",
+			},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := validateToken(tt.args.token); (err != nil) != tt.wantErr {
+				t.Errorf("validateToken() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 func Test_getSTSSessionToken(t *testing.T) {
 	type args struct {
 		stsInstance           stsiface.STSAPI
