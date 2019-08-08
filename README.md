@@ -54,7 +54,6 @@ export AWS_SECRET_ACCESS_KEY="JSKA...HJ2F
 export AWS_SESSION_TOKEN=ZQ...1VVQ==
 export AWS_SECURITY_TOKEN=ZQ...1VVQ==
 export X_PRINCIPAL_ARN=arn:aws:iam::3678236812376:user/johnsmith
-export EXPIRES=59m58.593852s
 ```
 
 If you use `eval $(mfa4aws shell)` frequently, you may want to create a alias for it:
@@ -85,7 +84,6 @@ The exec sub command will export the following environment variables.
 * AWS_SESSION_TOKEN
 * AWS_SECURITY_TOKEN
 * X_PRINCIPAL_ARN
-* EXPIRES
 
 # License
 
