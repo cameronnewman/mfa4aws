@@ -1,20 +1,17 @@
 package aws
 
 import (
-	"time"
-
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
 )
 
 //Credentials represents the set of attributes used to authenticate to AWS with a short lived session
 type Credentials struct {
-	AWSAccessKeyID     string    `ini:"aws_access_key_id"`
-	AWSSecretAccessKey string    `ini:"aws_secret_access_key"`
-	AWSSessionToken    string    `ini:"aws_session_token"`
-	AWSSecurityToken   string    `ini:"aws_security_token"`
-	PrincipalARN       string    `ini:"x_principal_arn"`
-	Expires            time.Time `ini:"x_security_token_expires"`
+	AWSAccessKeyID     string `ini:"aws_access_key_id"`
+	AWSSecretAccessKey string `ini:"aws_secret_access_key"`
+	AWSSessionToken    string `ini:"aws_session_token"`
+	AWSSecurityToken   string `ini:"aws_security_token"`
+	PrincipalARN       string `ini:"x_principal_arn"`
 }
 
 //GenerateSTSCredentials created STS Credentials
@@ -49,6 +46,5 @@ func GenerateSTSCredentials(profile string, tokenCode string) (*Credentials, err
 		AWSSessionToken:    *stsSessionCredentials.SessionToken,
 		AWSSecurityToken:   *stsSessionCredentials.SessionToken,
 		PrincipalARN:       identity.ARN,
-		Expires:            *stsSessionCredentials.Expiration,
 	}, nil
 }

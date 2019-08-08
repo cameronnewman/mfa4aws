@@ -11,7 +11,6 @@ const (
 	envNameAWSSessionToken  string = "AWS_SESSION_TOKEN"
 	envNameAWSSecurityToken string = "AWS_SECURITY_TOKEN"
 	envNameXPrincipalARN    string = "X_PRINCIPAL_ARN"
-	envNameExpires          string = "EXPIRES"
 
 	bashExport string = "export"
 )
@@ -24,7 +23,6 @@ func BuildEnvVars(creds *aws.Credentials) (envVars []string) {
 		fmt.Sprintf("%s %s=%s", bashExport, envNameAWSSessionToken, creds.AWSSessionToken),
 		fmt.Sprintf("%s %s=%s", bashExport, envNameAWSSecurityToken, creds.AWSSecurityToken),
 		fmt.Sprintf("%s %s=%s", bashExport, envNameXPrincipalARN, creds.PrincipalARN),
-		fmt.Sprintf("%s %s=%s", bashExport, envNameExpires, creds.Expires.String()),
 	)
 
 	return envVars
