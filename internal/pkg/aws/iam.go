@@ -1,7 +1,6 @@
 package aws
 
 import (
-
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"

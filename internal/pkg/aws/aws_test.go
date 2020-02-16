@@ -13,19 +13,33 @@ func init() {
 	appFs = afero.NewMemMapFs()
 
 	//Known Path
-	afero.WriteFile(appFs, "/knowntestfile.txt", []byte(`test`), 0644)
-	afero.WriteFile(appFs, "/emptyknowntestfile.txt", []byte(nil), 0000)
+	err := afero.WriteFile(appFs, "/knowntestfile.txt", []byte(`test`), 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	err = afero.WriteFile(appFs, "/emptyknowntestfile.txt", []byte(nil), 0000)
+	if err != nil {
+		panic(err)
+	}
 
 	//$HOME/.aws/credentials
 	user, _ := user.Current()
 	path := filepath.Join(user.HomeDir, ".aws")
 	credentialsFile := filepath.Join(path, "credentials")
 
-	appFs.MkdirAll(path, 0755)
-	afero.WriteFile(appFs, credentialsFile, []byte(`
+	err = appFs.MkdirAll(path, 0755)
+	if err != nil {
+		panic(err)
+	}
+
+	err = afero.WriteFile(appFs, credentialsFile, []byte(`
 	[default]
 	aws_access_key_id = blahblah
 	aws_secret_access_key = blahblah/blahblah`), 0644)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func TestGenerateSTSCredentials(t *testing.T) {
