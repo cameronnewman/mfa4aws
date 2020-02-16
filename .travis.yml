@@ -4,6 +4,7 @@ ignore:
   - examples/*
 env:
   - GOARCH=amd64
+  - ENV=ci
 notifications:
   email:
     on_success: change
