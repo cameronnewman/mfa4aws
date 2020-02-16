@@ -9,7 +9,7 @@ import (
 
 	"mfa4aws/internal/pkg/aws/mock/iammock"
 
-	"golang.org/x/xerrors"
+	"errors"
 )
 
 func Test_getIAMUserMFADevice(t *testing.T) {
@@ -46,7 +46,7 @@ func Test_getIAMUserMFADevice(t *testing.T) {
 			args{
 				iamInstance: &iammock.IAMAPIMock{
 					ListMFADevicesFunc: func(in1 *iam.ListMFADevicesInput) (*iam.ListMFADevicesOutput, error) {
-						return nil, awserr.New("5000", "blah", xerrors.New("blah"))
+						return nil, awserr.New("5000", "blah", errors.New("blah"))
 					},
 				},
 			},
@@ -58,7 +58,7 @@ func Test_getIAMUserMFADevice(t *testing.T) {
 			args{
 				iamInstance: &iammock.IAMAPIMock{
 					ListMFADevicesFunc: func(in1 *iam.ListMFADevicesInput) (*iam.ListMFADevicesOutput, error) {
-						return nil, xerrors.New("blah")
+						return nil, errors.New("blah")
 					},
 				},
 			},

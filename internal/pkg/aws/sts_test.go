@@ -11,7 +11,7 @@ import (
 
 	"mfa4aws/internal/pkg/aws/mock/stsmock"
 
-	"golang.org/x/xerrors"
+	"errors"
 )
 
 func Test_validateToken(t *testing.T) {
@@ -99,7 +99,7 @@ func Test_getSTSSessionToken(t *testing.T) {
 			args{
 				stsInstance: &stsmock.STSAPIMock{
 					GetSessionTokenFunc: func(in1 *sts.GetSessionTokenInput) (*sts.GetSessionTokenOutput, error) {
-						return nil, awserr.New("5000", "blah", xerrors.New("blah"))
+						return nil, awserr.New("5000", "blah", errors.New("blah"))
 					},
 				},
 				tokenCode:             "123456",
@@ -113,7 +113,7 @@ func Test_getSTSSessionToken(t *testing.T) {
 			args{
 				stsInstance: &stsmock.STSAPIMock{
 					GetSessionTokenFunc: func(in1 *sts.GetSessionTokenInput) (*sts.GetSessionTokenOutput, error) {
-						return nil, awserr.New(sts.ErrCodeExpiredTokenException, "Blah", xerrors.New("blah"))
+						return nil, awserr.New(sts.ErrCodeExpiredTokenException, "Blah", errors.New("blah"))
 					},
 				},
 				tokenCode:             "123456",
@@ -127,7 +127,7 @@ func Test_getSTSSessionToken(t *testing.T) {
 			args{
 				stsInstance: &stsmock.STSAPIMock{
 					GetSessionTokenFunc: func(in1 *sts.GetSessionTokenInput) (*sts.GetSessionTokenOutput, error) {
-						return nil, awserr.New(sts.ErrCodeInvalidIdentityTokenException, "Blah", xerrors.New("blah"))
+						return nil, awserr.New(sts.ErrCodeInvalidIdentityTokenException, "Blah", errors.New("blah"))
 					},
 				},
 				tokenCode:             "123456",
@@ -141,7 +141,7 @@ func Test_getSTSSessionToken(t *testing.T) {
 			args{
 				stsInstance: &stsmock.STSAPIMock{
 					GetSessionTokenFunc: func(in1 *sts.GetSessionTokenInput) (*sts.GetSessionTokenOutput, error) {
-						return nil, xerrors.New("blah")
+						return nil, errors.New("blah")
 					},
 				},
 				tokenCode:             "123456",
@@ -205,7 +205,7 @@ func Test_getSTSIdentity(t *testing.T) {
 			args{
 				stsInstance: &stsmock.STSAPIMock{
 					GetCallerIdentityFunc: func(in1 *sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error) {
-						return nil, xerrors.New("blah")
+						return nil, errors.New("blah")
 					},
 				},
 			},
@@ -217,7 +217,7 @@ func Test_getSTSIdentity(t *testing.T) {
 			args{
 				stsInstance: &stsmock.STSAPIMock{
 					GetCallerIdentityFunc: func(in1 *sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error) {
-						return nil, awserr.New("askjdhaksjhd", "Blah", xerrors.New("blah"))
+						return nil, awserr.New("askjdhaksjhd", "Blah", errors.New("blah"))
 					},
 				},
 			},
