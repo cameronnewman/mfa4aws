@@ -53,7 +53,7 @@ else
 endif
 
 .PHONY: build
-build: test
+build: version test
 	@echo "Building"
 
 	docker run -it --rm \
@@ -64,7 +64,7 @@ build: test
 	@echo "Completed build"
 
 .PHONY: release
-release: 
+release:
 	@echo "Releasing"
 
 	docker run -it --rm \
