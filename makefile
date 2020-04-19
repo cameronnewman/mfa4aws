@@ -43,7 +43,7 @@ endif
 
 .PHONY: test
 test: ## Runs the tests within a docker container
-ifeq ($(ENV),local)
+ifeq (,local)
 	go test -cover -v -p 8 -count=1 ./...
 else
 	docker run --rm --name=$(BUILD_NAME) \
@@ -53,10 +53,11 @@ else
 endif
 
 .PHONY: build
-build: version test
+build: version
 	@echo "Building"
 
 	docker run -it --rm \
+	-e ENV=$(ENV) \
 	-v $(PWD):/usr/src/myapp \
 	-w /usr/src/myapp $(BUILD_IMAGE) \
 	bash scripts/docker/build.sh $(BINARY) $(VERSION)
