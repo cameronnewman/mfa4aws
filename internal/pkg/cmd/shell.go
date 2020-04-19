@@ -18,9 +18,13 @@ func init() {
 	rootCmd.AddCommand(shellCmd)
 
 	persistentFlags := shellCmd.PersistentFlags()
-    persistentFlags.StringVarP(&awsProfile, "profile", "p", "default", "AWS Profile name in $HOME/.aws/credentials")
-    persistentFlags.StringVarP(&mfaToken, "token", "t", "", "Current MFA value to use for STS generation")
-    cobra.MarkFlagRequired(persistentFlags, "token")
+	persistentFlags.StringVarP(&awsProfile, "profile", "p", "default", "AWS Profile name in $HOME/.aws/credentials")
+	persistentFlags.StringVarP(&mfaToken, "token", "t", "", "Current MFA value to use for STS generation")
+	err := cobra.MarkFlagRequired(persistentFlags, "token")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
 var shellCmd = &cobra.Command{

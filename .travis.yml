@@ -4,6 +4,7 @@ ignore:
   - examples/*
 env:
   - GOARCH=amd64
+  - ENV=ci
 notifications:
   email:
     on_success: change
@@ -14,7 +15,7 @@ sudo: required
 services:
   - docker
 
-script: make && make release
+script: make fmt && make lint && make && make release
 
 after_success:
   - ./scripts/ci/tag.sh
