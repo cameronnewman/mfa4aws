@@ -71,7 +71,7 @@ build: version
 release:
 	@echo "Releasing"
 
-	docker run -it --rm \
+	docker run --rm \
 	-v $(PWD):/usr/src/myapp \
 	-w /usr/src/myapp $(BUILD_IMAGE) \
 	bash scripts/docker/release.sh $(VERSION)
