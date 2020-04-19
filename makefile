@@ -23,7 +23,7 @@ ifeq ($(ENV),local)
 else
 	docker run --rm --name=$(BUILD_NAME) \
 	-v $(PWD):/usr/src/$(REPO) \
-	-w /usr/src/$(REPO) $(DOCKER_BASE_IMAGE) \
+	-w /usr/src/$(REPO) $(BUILD_IMAGE) \
 	go fmt ./...
 endif
 
@@ -48,7 +48,7 @@ ifeq ($(ENV),local)
 else
 	docker run --rm --name=$(BUILD_NAME) \
 	-v $(PWD):/usr/src/$(REPO) \
-	-w /usr/src/$(REPO) $(DOCKER_BASE_IMAGE) \
+	-w /usr/src/$(REPO) $(BUILD_IMAGE) \
 	go test -cover -v -p 8 -count=1 ./...
 endif
 
