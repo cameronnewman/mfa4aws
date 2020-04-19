@@ -4,7 +4,7 @@ MINOR_VERSION		:= $(shell cat app.json | sed -n 's/.*"minor": "\(.*\)"/\1/p')
 INTERNAL_BUILD_ID	:= $(shell [ -z "${TRAVIS_BUILD_NUMBER}" ] && echo "local" || echo ${TRAVIS_BUILD_NUMBER})
 BINARY				:= $(shell cat app.json | sed -n 's/.*"name": "\(.*\)",/\1/p')
 VERSION				:= $(shell echo "${MAJOR_VERSION}.${MINOR_VERSION}.${INTERNAL_BUILD_ID}-${SHA1}")
-BUILD_IMAGE			:= $(shell echo "golang:1.13.8")
+BUILD_IMAGE			:= $(shell echo "golang:1.14.2")
 PWD					:= $(shell pwd)
 
 ENV 				?= local
@@ -37,7 +37,7 @@ else
 	-e GO111MODULE=on \
 	-e REPO=$(REPOPATH)$(REPO) \
 	-v $(PWD):/usr/src/ \
-	golangci/golangci-lint:v1.20.0 \
+	golangci/golangci-lint:v1.24 \
 	/bin/bash -c 'cd /usr/src/ && golangci-lint run'
 endif
 
