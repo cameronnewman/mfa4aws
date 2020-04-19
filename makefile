@@ -56,7 +56,7 @@ endif
 build: version
 	@echo "Building"
 
-	docker run -it --rm \
+	docker run --rm \
 	-e ENV=$(ENV) \
 	-v $(PWD):/usr/src/myapp \
 	-w /usr/src/myapp $(BUILD_IMAGE) \
