@@ -9,6 +9,9 @@ PWD					:= $(shell pwd)
 
 ENV 				?= local
 
+
+# Replace TRAVIS_BUILD_NUMBER with GITHUB_RUN_NUMBER
+
 .DEFAULT_GOAL := build
 
 .PHONY: version
