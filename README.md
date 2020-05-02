@@ -1,4 +1,4 @@
-# mfa4aws [![Build Status](https://travis-ci.org/cameronnewman/mfa4aws.svg?branch=master)](https://travis-ci.org/cameronnewman/mfa4aws) [![Go Report Card](https://goreportcard.com/badge/github.com/cameronnewman/mfa4aws)](https://goreportcard.com/report/github.com/cameronnewman/mfa4aws) [![codecov](https://codecov.io/gh/cameronnewman/mfa4aws/branch/master/graph/badge.svg)](https://codecov.io/gh/cameronnewman/mfa4aws)
+# mfa4aws [![Build Status](https://travis-ci.org/cameronnewman/mfa4aws.svg?branch=master)](https://travis-ci.org/cameronnewman/mfa4aws) ![CI](https://github.com/cameronnewman/mfa4aws/workflows/CI/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/cameronnewman/mfa4aws)](https://goreportcard.com/report/github.com/cameronnewman/mfa4aws) [![codecov](https://codecov.io/gh/cameronnewman/mfa4aws/branch/master/graph/badge.svg)](https://codecov.io/gh/cameronnewman/mfa4aws)
 
 Simple CLI tool which enables you to login and retrieve [AWS](https://aws.amazon.com/) temporary credentials  for IAM users.
 
