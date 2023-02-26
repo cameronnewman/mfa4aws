@@ -1,13 +1,13 @@
 package aws
 
+//go:generate go run -tags tools github.com/matryer/moq -pkg aws -out iam_test_mock.go $GOPATH/pkg/mod/github.com/aws/aws-sdk-go@v1.34.0/service/iam/iamiface IAMAPI
+
 import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/iam/iamiface"
-
-	"mfa4aws/internal/pkg/aws/mock/iammock"
 
 	"errors"
 )
@@ -25,7 +25,7 @@ func Test_getIAMUserMFADevice(t *testing.T) {
 		{
 			"Vaild/DeviceFound",
 			args{
-				iamInstance: &iammock.IAMAPIMock{
+				iamInstance: &IAMAPIMock{
 					ListMFADevicesFunc: func(in1 *iam.ListMFADevicesInput) (*iam.ListMFADevicesOutput, error) {
 						sn := "shsjdyshe"
 
@@ -44,7 +44,7 @@ func Test_getIAMUserMFADevice(t *testing.T) {
 		{
 			"Invaild/awserrError",
 			args{
-				iamInstance: &iammock.IAMAPIMock{
+				iamInstance: &IAMAPIMock{
 					ListMFADevicesFunc: func(in1 *iam.ListMFADevicesInput) (*iam.ListMFADevicesOutput, error) {
 						return nil, awserr.New("5000", "blah", errors.New("blah"))
 					},
@@ -56,7 +56,7 @@ func Test_getIAMUserMFADevice(t *testing.T) {
 		{
 			"Invaild/Error",
 			args{
-				iamInstance: &iammock.IAMAPIMock{
+				iamInstance: &IAMAPIMock{
 					ListMFADevicesFunc: func(in1 *iam.ListMFADevicesInput) (*iam.ListMFADevicesOutput, error) {
 						return nil, errors.New("blah")
 					},
@@ -68,7 +68,7 @@ func Test_getIAMUserMFADevice(t *testing.T) {
 		{
 			"Invaild/NoDevices",
 			args{
-				iamInstance: &iammock.IAMAPIMock{
+				iamInstance: &IAMAPIMock{
 					ListMFADevicesFunc: func(in1 *iam.ListMFADevicesInput) (*iam.ListMFADevicesOutput, error) {
 
 						output := &iam.ListMFADevicesOutput{
