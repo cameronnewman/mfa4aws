@@ -2,38 +2,21 @@ name: CI
 on: [push]
 jobs:
 
-  fmt:
-    name: fmt
+  test:
     runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/master'
+    name: fmt, lint, test
     env:
-      ENV: ci
+      ENVIRONMENT: ci
     steps:
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v1
-    - name: Run fmt
-      run: make fmt
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
 
-  lint:
-    name: lint
-    runs-on: ubuntu-latest
-    env:
-      ENV: ci
-    steps:
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v1
-    - name: Run lint
-      run: make lint
+      - name: Run fmt & lint
+        run: make generate && make fmt && make lint
 
-  tests:
-    name: tests
-    runs-on: ubuntu-latest
-    env:
-      ENV: ci
-    steps:
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v1
-    - name: Run tests
-      run: make test
+      - name: Run tests
+        run: make generate && make test
 
   build:
     name: build
@@ -44,4 +27,4 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
     - name: Run build
-      run: make build
+      run: make generate && make build
