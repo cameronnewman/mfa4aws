@@ -1,4 +1,18 @@
-# mfa4aws [![Build Status](https://travis-ci.org/cameronnewman/mfa4aws.svg?branch=master)](https://travis-ci.org/cameronnewman/mfa4aws) ![CI](https://github.com/cameronnewman/mfa4aws/workflows/CI/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/cameronnewman/mfa4aws)](https://goreportcard.com/report/github.com/cameronnewman/mfa4aws) [![codecov](https://codecov.io/gh/cameronnewman/mfa4aws/branch/master/graph/badge.svg)](https://codecov.io/gh/cameronnewman/mfa4aws)
+# mfa4aws  
+
+[![Build][1]][2]
+[![GoDoc][3]][4]
+[![Go Report Card][5]][6]
+[![FOSSA Status][9]][10]
+
+[1]: https://github.com/cameronnewman/mfa4aws/workflows/pipeline/badge.svg
+[2]: https://github.com/cameronnewman/mfa4aws/actions
+[3]: https://godoc.org/github.com/cameronnewman/mfa4aws?status.svg
+[4]: https://godoc.org/github.com/cameronnewman/mfa4aws
+[5]: https://goreportcard.com/badge/github.com/cameronnewman/mfa4aws
+[6]: https://goreportcard.com/report/github.com/cameronnewman/mfa4aws
+[9]: https://app.fossa.io/api/projects/git%2Bgithub.com%2Fcameronnewman%2Fmfa4aws.svg?type=shield
+[10]: https://app.fossa.io/projects/git%2Bgithub.com%2Fcameronnewman%2Fmfa4aws?ref=badge_shield
 
 Simple CLI tool which enables you to login and retrieve [AWS](https://aws.amazon.com/) temporary credentials  for IAM users.
 

@@ -1,5 +1,7 @@
 package aws
 
+//go:generate go run -tags tools github.com/matryer/moq -pkg aws -out sts_test_mock.go $GOPATH/pkg/mod/github.com/aws/aws-sdk-go@v1.34.0/service/sts/stsiface STSAPI
+
 import (
 	"reflect"
 	"testing"
@@ -8,8 +10,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/aws/aws-sdk-go/service/sts/stsiface"
-
-	"mfa4aws/internal/pkg/aws/mock/stsmock"
 
 	"errors"
 )
@@ -83,7 +83,7 @@ func Test_getSTSSessionToken(t *testing.T) {
 		{
 			"Vaild/EmptyResult",
 			args{
-				stsInstance: &stsmock.STSAPIMock{
+				stsInstance: &STSAPIMock{
 					GetSessionTokenFunc: func(in1 *sts.GetSessionTokenInput) (*sts.GetSessionTokenOutput, error) {
 						return &sts.GetSessionTokenOutput{}, nil
 					},
@@ -97,7 +97,7 @@ func Test_getSTSSessionToken(t *testing.T) {
 		{
 			"Invaild/awserrError",
 			args{
-				stsInstance: &stsmock.STSAPIMock{
+				stsInstance: &STSAPIMock{
 					GetSessionTokenFunc: func(in1 *sts.GetSessionTokenInput) (*sts.GetSessionTokenOutput, error) {
 						return nil, awserr.New("5000", "blah", errors.New("blah"))
 					},
@@ -111,7 +111,7 @@ func Test_getSTSSessionToken(t *testing.T) {
 		{
 			"Invaild/awserrError/ErrCodeExpiredTokenException",
 			args{
-				stsInstance: &stsmock.STSAPIMock{
+				stsInstance: &STSAPIMock{
 					GetSessionTokenFunc: func(in1 *sts.GetSessionTokenInput) (*sts.GetSessionTokenOutput, error) {
 						return nil, awserr.New(sts.ErrCodeExpiredTokenException, "Blah", errors.New("blah"))
 					},
@@ -125,7 +125,7 @@ func Test_getSTSSessionToken(t *testing.T) {
 		{
 			"Invaild/awserrError/ErrCodeInvalidIdentityTokenException",
 			args{
-				stsInstance: &stsmock.STSAPIMock{
+				stsInstance: &STSAPIMock{
 					GetSessionTokenFunc: func(in1 *sts.GetSessionTokenInput) (*sts.GetSessionTokenOutput, error) {
 						return nil, awserr.New(sts.ErrCodeInvalidIdentityTokenException, "Blah", errors.New("blah"))
 					},
@@ -139,7 +139,7 @@ func Test_getSTSSessionToken(t *testing.T) {
 		{
 			"Invaild/Error",
 			args{
-				stsInstance: &stsmock.STSAPIMock{
+				stsInstance: &STSAPIMock{
 					GetSessionTokenFunc: func(in1 *sts.GetSessionTokenInput) (*sts.GetSessionTokenOutput, error) {
 						return nil, errors.New("blah")
 					},
@@ -178,7 +178,7 @@ func Test_getSTSIdentity(t *testing.T) {
 		{
 			"Valid/User",
 			args{
-				stsInstance: &stsmock.STSAPIMock{
+				stsInstance: &STSAPIMock{
 					GetCallerIdentityFunc: func(in1 *sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error) {
 
 						account := "342563637373"
@@ -203,7 +203,7 @@ func Test_getSTSIdentity(t *testing.T) {
 		{
 			"Invaild/Error",
 			args{
-				stsInstance: &stsmock.STSAPIMock{
+				stsInstance: &STSAPIMock{
 					GetCallerIdentityFunc: func(in1 *sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error) {
 						return nil, errors.New("blah")
 					},
@@ -215,7 +215,7 @@ func Test_getSTSIdentity(t *testing.T) {
 		{
 			"Invaild/awserrError",
 			args{
-				stsInstance: &stsmock.STSAPIMock{
+				stsInstance: &STSAPIMock{
 					GetCallerIdentityFunc: func(in1 *sts.GetCallerIdentityInput) (*sts.GetCallerIdentityOutput, error) {
 						return nil, awserr.New("askjdhaksjhd", "Blah", errors.New("blah"))
 					},

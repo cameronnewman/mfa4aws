@@ -17,3 +17,5 @@
 
 /bin
 /release
+/.idea
+/BUILD_VERSION.txt

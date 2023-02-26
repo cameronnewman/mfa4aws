@@ -1,5 +1,5 @@
-
 #!/usr/bin/env bash
+# shellcheck disable=all
 
 BIN_FOLDER="bin"
 RELEASE_FOLDER="release"
@@ -19,8 +19,8 @@ mkdir -p $RELEASE_FOLDER
 for f in $FILES
 do
   echo "Processing $f file..."
-  FILE=`basename $f`
-  tar -czvf $RELEASE_FOLDER/$FILE.tar.gz --transform 's#^bin/##' $f
+  FILE=$(basename $f)
+  tar -czvf $RELEASE_FOLDER/"$FILE".tar.gz --transform 's#^bin/##' "$f"
   if [ $? -ne 0 ]; then
       echo 'An error has occurred! Aborting the script execution...'
       exit 1
