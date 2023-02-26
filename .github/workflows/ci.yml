@@ -21,10 +21,16 @@ jobs:
   build:
     name: build
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
     env:
       ENV: ci
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
+
     - name: Run build
-      run: make generate && make build
+      run: make generate && make test && make build
+
+    - name: run tag export
+      run: ./scripts/ci/tag.sh
